@@ -14,9 +14,8 @@ const bookSchema = new mongoose.Schema( {
         default:2021
     },
     price:{
-        type:String,
-        indian:INR,
-        europe:EURO
+        indian:String,
+        european:String
     }
 
 }, { timestamps: true });
