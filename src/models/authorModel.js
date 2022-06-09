@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema( {
- author_Name: {type:String, required:true},
+ author_id:{type:Number, required:true, },   
+ author_Name:String, 
  age: Number,
  adress: String
 }, { timestamps: true });

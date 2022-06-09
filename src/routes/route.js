@@ -21,4 +21,8 @@ router.get('/findTwoStates', BookController.findTwoStates)
 
 router.get('/findBook', BookController.findBook)
 
+router.get('/books-By-Authorid/:author_id', BookController.booksByAuthorId)
+
+router.get('/listOfAuthors', BookController.listOfAuthors)
+
 module.exports = router;
