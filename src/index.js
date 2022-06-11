@@ -14,10 +14,15 @@ mongoose.connect("mongodb+srv://functionup-cohort:G0Loxqc9wFEGyEeJ@cluster0.rzot
 .then( () => console.log("MongoDb is connected"))
 .catch ( err => console.log(err) )
 
+const moment = require('moment')
 app.use (
     function (req, res, next) {
-        console.log ("inside GLOBAL MW");
-        next();
+       
+        let dateAndTime = moment().format('YYYY-MM-DD h:mm:ss') 
+        let location = req.socket.remoteAddress
+        let path = req.originalUrl
+        console.log(dateAndTime,location,path)
+        next()
   }
   );
 
