@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const authorSchema = new mongoose.Schema( {
+const productSchema = new mongoose.Schema( {
     name: String,
     catagory:String,
     price:{
@@ -10,4 +10,4 @@ const authorSchema = new mongoose.Schema( {
 
 }, { timestamps: true });
 
-module.exports = mongoose.model('Product', authorSchema)
+module.exports = mongoose.model('Product', productSchema)

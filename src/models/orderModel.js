@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Schema.Types.ObjectId
 
-const bookSchema = new mongoose.Schema( {
+const orderSchema = new mongoose.Schema( {
     userId: ObjectId,
     productId: ObjectId,
     amount: Number,
@@ -10,4 +10,4 @@ const bookSchema = new mongoose.Schema( {
 }, { timestamps: true });
 
 
-module.exports = mongoose.model('Oder', bookSchema) //users
+module.exports = mongoose.model('Order', orderSchema) 
