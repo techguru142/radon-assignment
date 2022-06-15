@@ -18,4 +18,6 @@ router.put("/users/:userId",middlewares.checkAuth, userController.updateUser)
 
 router.delete("/users/:userId",middlewares.checkAuth, userController.deleteUser)
 
+router.post("/users/:userId/posts",middlewares.checkAuth, userController.postMessage)
+
 module.exports = router;

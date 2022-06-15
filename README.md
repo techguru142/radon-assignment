@@ -1,11 +1,11 @@
-# TOPIC: Authentication
+# TOPIC: Authorisation
 
 ## Authentication with JWT
 - Token generation
 - Token verification
 
 ## Assignment
-- For this assignment you have to create a new branch - assignment/auth-1
+- For this assignment you have to create a new branch - **assignment/auth-3**
 - Your user document should look like this
 ```
  	{
@@ -25,20 +25,17 @@
 ```
 
 
-- Write a **POST api /users** to register a user from the user details in request body. 
-- Write a ***POST api /login** to login a user that takes user details - email and password from the request body. If the credentials don't match with any user's data return a suitable error.
-On successful login, generate a JWT token and return it in response body. Example 
-```
-{
- token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-}
-```
-- Write a **GET api /users/:userId** to fetch user details. Pass the userId as path param in the url. Check that request must contain **x-auth-token** header. If absent, return a suitable error.
+- Write a POST api to register a user from the user details in request body. 
+- Write a POST api to login a user that takes user details like email and password from the request body. If the credentials don't match with any user's data return a suitable error.
+On successful login, generate a JWT token and return it both in response body.
+- Write a GET api to fetch user details. Pass the userId as path param in the url. Check that request must contain x-auth-token header. If absent, return a suitable error.
 If present, check that the token is valid.
-- Write a **PUT api /users/:userId** to update user details. Pass the userId as path param in the url and update the attributes received in the request body. Check that request must contain **x-auth-token** header. If absent, return a suitable error.
-- Write a **DELETE api /users/:userId** that takes the userId in the path params and marks the isDeleted attribute for a user as true. Check that request must contain **x-auth-token** header. If absent, return a suitable error.
+- Write a PUT api to update user details. Pass the userId as path param in the url and update the attributes received in the reauest body. Check that request must contain x-auth-token header. If absent, return a suitable error.
+- Write a DELETE api that takes the userId in the path params and marks the isDeleted attribute for a user as true. Check that request must contain x-auth-token header. If absent, return a suitable error.
 - Once, all the apis are working fine, move the authentication related code in a middleware called auth.js
-- Add this middleware at route level in the routes where applicable.
+- Add this middleware at route level in the routes where applicale.
 
-
-
+```diff
++ Please note that you have to also write the logic for authorisation now so that a logged in user can modify or fetch only their own data.
++ You have to implement authorisation for fetch user details, update user and delete user apisg
++ You have to move this similar code in all three apis in a suitable middleware
