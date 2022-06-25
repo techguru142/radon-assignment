@@ -1,5 +1,7 @@
 const blogModel = require("../models/blogModel")
 const authorModel = require("../models/authorModel")
+const { default: isBoolean } = require("validator/lib/isBoolean")
+const jwt = require('jsonwebtoken')
 
 
 const createBlog = async function (req, res) {
@@ -9,18 +11,44 @@ const createBlog = async function (req, res) {
     if (!receivedData.title) { return res.status(400).send({ status: false, msg: "title is missing" }) }
     //if title is present then please check
     if(receivedData.title){
-      if(receivedData.title.trim().length==0 ) return res.status(400).send({status:false,msg:"empty space is not allowed"})
+      if(receivedData.title.trim().length==0 ) return res.status(400).send({status:false,msg:"emty space is not allowed"})
       if(!isNaN(receivedData.title)){ return res.status(400).send({status:false, msg:"title can not be a number only"})}
+      let titleTrim = /^[^ ][\w\W ]*[^ ]/
+      if (!titleTrim.test(receivedData.title)) { return res.status(400).send({ status:false, msg: "Title have white space at begining or end" }) }
     }
     //body is mandatory
     if (!receivedData.body) { return res.status(400).send({ status: false, msg: "body is missing" }) }
-    //if body is present then please check
+     //if body is present then please check
     if(receivedData.body){
       if(receivedData.body.trim().length==0 ) return res.status(400).send({status:false,msg:"empty space is not allowed"})
-      if(!isNaN(receivedData.body)){ return res.status(400).send({status:false, msg:"body can not be a number only"})}
+      if(!isNaN(receivedData.body)){ return res.status(400).send({status:false, msg:"Body can not be a number only"})}
+      let bodyTrim = /^[^ ][\w\W ]*[^ ]/
+       if (!bodyTrim.test(receivedData.body)) { return res.status(400).send({ status:false, msg: "body have white space at begining or end" }) }
     }
     //catagory is mandatory
     if (!receivedData.catagory) { return res.status(400).send({ status: false, msg: "catagory is missing" }) }
+    if(receivedData.catagory){
+    if (typeof receivedData.catagory != "object") { res.status(400).send({ status:false, msg: "catagory should be in form of Array" }) }
+    if(!isNaN(receivedData.catagory)){return res.status(400).send({status:false, msg:"catagory can not be empty or number only"})}
+    let categoryTrim = /^[^ ][\W\w ]*[^ ]/
+    if (categoryTrim.test(receivedData.subCategory)) { return res.status(400).send({ status: false, msg: "catagory contains white space at begining or end"}) }
+    }
+    if(receivedData.subCatagory){
+    if (typeof receivedData.subCatagory != "object") { res.status(400).send({ status:false, msg: "Subcatagory should be in form of Array" }) }
+    if(!isNaN(receivedData.subCatagory )){return res.status(400).send({status:false, msg:"subCatagory can not be a number only or empty"})}
+    let subcategoryTrim = /^\s*(\S(.*\S)?)\s*$/
+    if (!subcategoryTrim.test(receivedData.subCategory)) { return res.status(400).send({ status: false, msg: "subCatagory contains white space at begining or end"}) }
+    }
+    //tag validation
+    if (typeof receivedData.tags != "object") { res.status(400).send({ status:false, msg: "Tags should be in form of Array" }) }
+    if (receivedData.tags) {
+      if(!isNaN(receivedData.tags)){return res.status(400).send({status:false, msg:"tags can not be a number only or empty"})}
+      let tagsTrim =/^[^ ][\w\W ]*[^ ]/
+       if (!tagsTrim.test(receivedData.tags)) { return res.status(400).send({ status:false, msg: "tags have white space at begining or end" }) }
+   }
+  
+  if(!isBoolean(receivedData.isDeleted)){return res.status(400).send({status:false, msg:"It should be only boolean value"})}
+  if(!isBoolean(receivedData.isPublished)){return res.status(400).send({status:false, msg:"It should be only boolean value"})}
     //authorId is mandatory
     if (!receivedData.authorId) { return res.status(400).send({ status: false, msg: "author id is missing" }) }
     //author id validation check
@@ -40,6 +68,19 @@ const createBlog = async function (req, res) {
 
 const getBlogData = async function (req, res) {
   try{
+    let token = req.headers["X-Api-Key"]
+    if (!token) token = req.headers["x-api-key"]
+    if(!token) return res.status(404).send({status:false, msg:"token must be present"})
+    let decodedToken = jwt.verify(token, 'project-blog')
+    if(!decodedToken) return res.status(400).send({status: false, msg:"token is not valid"})
+    let authorToBeModifiedByQuery=req.query.authorId
+    //userId for the logged-in user
+    let authorLoggedIn = decodedToken.authorId
+    //userId comparision to check if the logged-in user is requesting for their own data
+    if(authorToBeModifiedByQuery != authorLoggedIn) return res.status(401).send({status: false, msg: 'you are not authorised, login with correct user id or password'})
+if( authorToBeModifiedByBody != authorLoggedIn ) return res.status(401).send({status: false, msg: 'you are not authorised, login with correct user id or password'})
+    let spaceIn = Object.keys(req.query)
+    if(!spaceIn[00].trim()){}
     let authorId = req.query.authorId
   if (authorId) {
     let savedAuthorData = await authorModel.findById({ _id: authorId })
@@ -57,42 +98,49 @@ const getBlogData = async function (req, res) {
 //put Api
 const updateBlog = async function (req, res) {
   try {
+    let token = req.headers["X-Api-Key"]
+    if (!token) token = req.headers["x-api-key"]
+    if(!token) return res.status(404).send({status:false, msg:"token must be present"})
+    let decodedToken = jwt.verify(token, 'project-blog')
+if(!decodedToken) return res.status(400).send({status: false, msg:"token is not valid"})
+
+//userId for which the request is made. In this case message to be posted.
+let authorToBeModifiedByBody= req.body.authorId
+if(Object.keys(req.body).length ==0){
+return res.status(400).send({status: false, msg: 'body is empty'})
+}
+//userId for the logged-in user
+let authorLoggedIn = decodedToken.authorId
+if( authorToBeModifiedByBody != authorLoggedIn ) return res.status(401).send({status: false, msg: 'you are not authorised, login with correct user id or password'})
       let id = req.params.blogId
       let blog = await blogModel.findById(id)
       if (!blog) {
-          res.status(404).send({ status: "false", msg: "No such blogID exists" })
+          res.status(404).send({ status:false, msg: "No such blogID exists" })
       }
       if (blogModel.isDeleted != true) {
           let title = req.body.title
-          if (!title) { res.status(400).send({ status: "false", msg: "Title is missing" }) }
+          if (!title) { res.status(400).send({ status:false, msg: "Title is missing" }) }
           if (title) {
               let titleValidation = /^[-a-z0-9,\/()&:. ]*[a-z][-a-z0-9,\/()&:. ]*$/i
-              if (!titleValidation.test(title)) { return res.status(400).send({ status: "false", msg: "Invalid title" }) }
+              if (!titleValidation.test(title)) { return res.status(400).send({ status:false, msg: "Invalid title" }) }
           }
 
 
 
           let body = req.body.body
-          if (!body) { res.status(400).send({ status: "false", msg: "Body is missing" }) }
+          if (!body) { res.status(400).send({ status:false, msg: "Body is missing" }) }
           if (body) {
               let bodyValidation = /^[-a-z0-9,\/()&:. ]*[a-z][-a-z0-9,\/()&:. ]*$/i
-              if (!bodyValidation.test(body)) { return res.status(400).send({ status: "false", msg: "Invalid body format" }) }
-          }
-
-          let publishedAt = req.body.publishedAt
-          if (!publishedAt) { res.status(400).send({ status: "false", msg: "Enter publishedAt date" }) }
-          if (publishedAt) {
-              let validate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/
-              if (!validate.test(publishedAt)) { return res.status(400).send({ status: "false", msg: "Date should be in YYYY-MM-DD format" }) }
+              if (!bodyValidation.test(body)) { return res.status(400).send({ status: false, msg: "Invalid body format" }) }
           }
 
           let tags = req.body.tags
           if (!tags) { res.status(400).send({ status: "false", msg: "Tags are missing" }) }
-          if (typeof tags != "object") { res.status(400).send({ status: "false", msg: "Tags should be in form of Array" }) }
+          if (typeof tags != "object") { res.status(400).send({ status:false, msg: "Tags should be in form of Array" }) }
 
           if (tags) {
               let tagValidation = /^#?[a-zA-Z0-9]+/gm
-              if (!tagValidation.test(tags)) { return res.status(400).send({ status: "false", msg: "Invalid tags" }) }
+              if (!tagValidation.test(tags)) { return res.status(400).send({ status:false, msg: "Invalid tags" }) }
               let flag;
               if(tagValidation){
                   for(let i=0;i<tags.length;i++)
@@ -103,17 +151,17 @@ const updateBlog = async function (req, res) {
                       }
                   }
               }
-              if(flag==="true") {return res.status(400).send({status:"false",msg:"Tags can't contain empty values"})}
+              if(flag==="true") {return res.status(400).send({status:false,msg:"Tags can't contain empty values"})}
           }
 
 
           let subcategory = req.body.subcategory
           if (!subcategory) { res.status(400).send({ status: "false", msg: "Subcategory is missing" }) }
-          if (typeof subcategory != "object") { res.status(400).send({ status: "false", msg: "Subcategories should be in form of Array" }) }
+          if (typeof subcategory != "object") { res.status(400).send({ status:false, msg: "Subcategories should be in form of Array" }) }
 
           if (subcategory) {
               let subcategoryValidation = /^#?[a-zA-Z0-9]+/gm
-              if (!subcategoryValidation.test(subcategory)) { return res.status(400).send({ status: "false", msg: "Invalid subcategory" }) }
+              if (!subcategoryValidation.test(subcategory)) { return res.status(400).send({ status: false, msg: "Invalid subcategory" }) }
               let flag;
               if(subcategoryValidation){
                   for(let i=0;i<tags.length;i++)
@@ -124,7 +172,7 @@ const updateBlog = async function (req, res) {
                       }
                   }
               }
-              if(flag==="true") {return res.status(400).send({status:"false",msg:"Subcategory can't contain empty values"})}
+              if(flag==="true") {return res.status(400).send({status:false,msg:"Subcategory can't contain empty values"})}
           }
 
 
@@ -132,17 +180,17 @@ const updateBlog = async function (req, res) {
               $set: {
                   title: title,
                   body: body,
-                  publishedAt: publishedAt,
+                  publishedAt: new Date(),
                   isPublished: true
               }
           })
 
           let updatedData = await blogModel.findOneAndUpdate({ "_id": id },
               { $push: { tags: tags, subcategory: subcategory } }, { new: true })
-          res.status(200).send({ status: "true", msg: updatedData })
+          res.status(200).send({ status: true, data: updatedData })
       }
       else {
-          res.status(404).send({ status: "false", msg: "" })
+          res.status(404).send({ status: false, msg: "data not found" })
       }
 
   }
@@ -156,7 +204,18 @@ const updateBlog = async function (req, res) {
 //Delete api
 const deleteByParams = async function (req, res) {
   try {
-
+    let token = req.headers["X-Api-Key"]
+    if (!token) token = req.headers["x-api-key"]
+    if(!token) return res.status(404).send({status:false, msg:"token must be present"})
+    let decodedToken = jwt.verify(token, 'project-blog')
+if(!decodedToken) return res.status(400).send({status: false, msg:"token is not valid"})
+//userId for which the request is made. In this case message to be posted.
+let authorToBeModified = req.params.authorId
+//userId for the logged-in user
+let authorLoggedIn = decodedToken.authorId
+if( authorToBeModified != authorLoggedIn ) return res.status(401).send({status: false, msg: 'you are not authorised, login with correct user id or password'})
+    let spaceIn = Object.keys(req.query)
+    if(!spaceIn[00].trim()){}
     let blogId = req.params.blogId
     let savedBlogData = await blogModel.findById({ _id: blogId })
     //if blogid is valid
@@ -175,9 +234,24 @@ const deleteByParams = async function (req, res) {
 
 const deleteByQueryParams = async function (req, res) {
   try { 
-    let catagory = req.query.catagory
+    let token = req.headers["X-Api-Key"]
+    if (!token) token = req.headers["x-api-key"]
+    if(!token) return res.status(404).send({status:false, msg:"token must be present"})
+    let decodedToken = jwt.verify(token, 'project-blog')
+    if(!decodedToken) return res.status(400).send({status: false, msg:"token is not valid"})
+    
+    let authorToBeModifiedByQuery=req.query.authorId
+    //userId for the logged-in user
+    let authorLoggedIn = decodedToken.authorId
+    //userId comparision to check if the logged-in user is requesting for their own data
+  
+    if(authorToBeModifiedByQuery != authorLoggedIn) return res.status(401).send({status: false, msg: 'you are not authorised, login with correct user id or password'})
+  
+    let spaceIn = Object.keys(req.query)
+    if(!spaceIn[00].trim()){}
     let tags = req.query.tags
     let isPublished = req.query.isPublished
+    let catagory = req.query.catagory
     let authorid = req.query.authorId
     
     //validate author id
@@ -188,7 +262,7 @@ const deleteByQueryParams = async function (req, res) {
    //if(isPublished = false){
     let deletedData = await blogModel.findOneAndUpdate(
       {
-       isDeleted:false, $or: [{ catagory: catagory }, { authorId: authorid }, { tags: tags }, { isPublished: isPublished }]
+       isDeleted:false, $or: [{ catagory: catagory }, { authorId: authorid }, { tags: tags }, { isPublished: false }]
       }, { isDeleted: true, deletedAt: new Date() }, { new: true })
   
     //if there is no data then it will retun an error

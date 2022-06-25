@@ -11,10 +11,10 @@ router.get("/test-me", function (req, res) {
 router.post('/authors', authorController.createAuthor)
 router.post('/blogs', blogController.createBlog)
 router.post('/login', authorController.loginAuthor)
-router.get('/blogs', blogController.getBlogData)
-router.put('/blogs/:blogId', blogController.updateBlog)
-router.delete('/blogs/:blogId',blogController.deleteByParams)
-router.delete('/blogs', blogController.deleteByQueryParams)
+router.get('/blogs',middlewares.checkAuth, blogController.getBlogData)
+router.put('/blogs/:blogId',middlewares.checkAuth, blogController.updateBlog)
+router.delete('/blogs/:blogId',middlewares.checkAuth, blogController.deleteByParams)
+router.delete('/blogs',middlewares.checkAuth, blogController.deleteByQueryParams)
 
 
 

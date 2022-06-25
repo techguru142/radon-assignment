@@ -10,7 +10,7 @@ const createAuthor = async function(req, res){
     //if fname is present then please check
     if(data.fname){
       let nameValidation = /^[A-Za-z]+$/
-    if (!nameValidation.test(data.fname)) { return res.status(400).send({ status:false, msg: "numbers are not allowed in fname" }) }
+    if (!nameValidation.test(data.fname)) { return res.status(400).send({ status:false, msg: "number or whiteSpaces are not allowed in fname" }) }
       if(data.fname.trim().length==0) return res.status(400).send({status:false,msg:"empty space is not allowed"})
     
     }
@@ -20,7 +20,7 @@ const createAuthor = async function(req, res){
     if(data.lname){
       if(data.lname.trim().length==0 ) return res.status(400).send({status:false,msg:"empty space is not allowed"})
       let nameValidation = /^[A-Za-z]+$/
-      if (!nameValidation.test(data.lname)) { return res.status(400).send({ status:false, msg: "numbers are not allowed in lname" }) }
+      if (!nameValidation.test(data.lname)) { return res.status(400).send({ status:false, msg: "number or whiteSpaces are not allowed in lname" }) }
     }
     //title mandatory
     if(!data.title){return res.status(400).send({status:false, msg:"title is missing"})}
