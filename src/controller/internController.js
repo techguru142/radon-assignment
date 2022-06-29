@@ -20,7 +20,7 @@ const createIntern = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "Please provide intern details" });
     //extracting body keys
-    const { name, email, mobile, collegeName } = requestBody;
+    const { name, email, mobile, collegeName, isDeleted } = requestBody;
     //for valid name
     if (!isValid(name))
       return res
@@ -61,6 +61,14 @@ const createIntern = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please provide valid collegeName." });
+    
+    if (isDeleted == true)
+      return res
+        .status(400)
+        .send({
+          status: false,
+          msg: "Intern Details has been already Deleted",
+        });
 
     //for unique items;-
     const isNumberAlreadyUsed = await internModel.findOne({ mobile });
