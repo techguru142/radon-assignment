@@ -1,5 +1,5 @@
 const internModel = require("../Models/internModels");
-const collegeModel=require("../Models/collegeModals");
+const collegeModel=require("../Models/collegeModels");
 const validator=require("validator");
 
 
@@ -12,8 +12,7 @@ const createIntern = async function (req, res) {
  const isValidBody=function(body){
   return Object.keys(body).length>0
  };
-//  const regexMobile=/^[0-9]+$/
-//  const regexEmail=/^[a-zA-Z_\-\.0-9]+[@][a-z]{3,6}[.][a-z]{2,5}$/
+
  try{
   let requestBody=req.body;
   //-----------------------------VALIDATION START-----------------------------------//

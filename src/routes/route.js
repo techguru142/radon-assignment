@@ -1,7 +1,7 @@
 const express=require("express");
 const router=express.Router();
-const collegeController=require("../controller/college")
-const internController=require("../controller/intern")
+const collegeController=require("../controller/collegeController")
+const internController=require("../controller/internController")
 
 
 
