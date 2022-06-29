@@ -17,7 +17,9 @@ const createCollege = async function (req, res) {
   try {
     let data = req.body;
     const { name, fullName, logoLink } = data;
-
+    
+//---------------------VALIDATION STARTS-----------------------------//
+    
     if (!isValidReqBody(data))
       return res.status(400).send({
         status: false,
@@ -51,7 +53,8 @@ const createCollege = async function (req, res) {
 
     if (duplicatefullNames)
       return res.status(400).send({ message: `${name} is Already Exists` });
-
+//-----------------------------------VALIDATION ENDS----------------------------------------//
+    
     const collegeData = { name, fullName, logoLink };
 
     const collegeInfo = await collegeModels.create(collegeData);
