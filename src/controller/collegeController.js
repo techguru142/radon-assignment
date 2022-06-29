@@ -16,7 +16,7 @@ const createCollege = async function (req, res) {
 
   try {
     let data = req.body;
-    const { name, fullName, logoLink } = data;
+    const { name, fullName, logoLink,isDeleted } = data;
     
 //---------------------VALIDATION STARTS-----------------------------//
     
@@ -47,6 +47,13 @@ const createCollege = async function (req, res) {
         status: false,
         message: "Please Provide College Full Name To Create College",
       });
+    if (isDeleted == true)
+      return res
+        .status(400)
+        .send({
+          status: false,
+          msg: "Intern Details has been already Deleted",
+        });
 
     //Unique items
     const duplicatefullNames = await collegeModels.findOne({ name: name });
