@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const collegeSchema = new mongoose.Schema(
   {
-    name: { require: true, unique: true },
-    fullName: { require: true },
-    logoLink: { require: true },
-    isDeleted: { boolean, default: false },
+    name: {type:String, required: true, unique: true },
+    fullName: { type:String,required: true },
+    logoLink: { type:String , required: true },
+    isDeleted: {type: Boolean, default: false },
   },
   { timestamps:true }
 );

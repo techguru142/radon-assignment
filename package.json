@@ -18,7 +18,8 @@
   "homepage": "https://github.com/Nishant755/project-intershipGroup46#readme",
   "dependencies": {
     "express": "^4.18.1",
-    "mongoose": "^6.4.1"
+    "mongoose": "^6.4.1",
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.18"
