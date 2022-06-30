@@ -16,10 +16,10 @@ const createCollege = async function (req, res) {
 
   try {
     let data = req.body;
-    const { name, fullName, logoLink,isDeleted } = data;
-    
-//---------------------VALIDATION STARTS-----------------------------//
-    
+    const { name, fullName, logoLink, isDeleted } = data;
+
+    //---------------------VALIDATION STARTS-----------------------------//
+
     if (!isValidReqBody(data))
       return res.status(400).send({
         status: false,
@@ -32,7 +32,7 @@ const createCollege = async function (req, res) {
         message: "Please Provide College Name To Create College",
       });
 
-    if (/^[a-zA-Z]+$/.test(name)==false)
+    if (/^[a-zA-Z]+$/.test(name) == false)
       return res
         .status(400)
         .send({ status: false, message: "name can not be a number" });
@@ -42,39 +42,35 @@ const createCollege = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Please Provide Logo Link" });
 
-    if (/^[a-zA-Z ]+$/.test(fullName)==false)
+    if (/^[a-zA-Z ]+$/.test(fullName) == false)
       return res
         .status(400)
         .send({ status: false, message: "Fullname can not be a number" });
 
-    if (!isValid(fullName) )
+    if (!isValid(fullName))
       return res.status(400).send({
         status: false,
         message: "Please Provide College Full Name To Create College",
       });
-    if (isDeleted == true )
-      return res
-        .status(400)
-        .send({
-          status: false,
-          msg: "College Details has been already Deleted",
-        });
-    if (typeof isDeleted==="string")
-      return res
-        .status(400)
-        .send({
-          status: false,
-          msg: "isDeleted should be Boolean type",
-        });
+    if (isDeleted == true)
+      return res.status(400).send({
+        status: false,
+        msg: "College Details has been already Deleted",
+      });
+    if (typeof isDeleted === "string")
+      return res.status(400).send({
+        status: false,
+        msg: "isDeleted should be Boolean type",
+      });
 
     //Unique items
     const duplicatefullNames = await collegeModels.findOne({ name: name });
 
     if (duplicatefullNames)
       return res.status(400).send({ message: `${name} is Already Exists` });
-//-----------------------------------VALIDATION ENDS----------------------------------------//
-    
-    const collegeData = { name, fullName, logoLink ,isDeleted};
+    //-----------------------------------VALIDATION ENDS----------------------------------------//
+
+    const collegeData = { name, fullName, logoLink, isDeleted };
 
     const collegeInfo = await collegeModels.create(collegeData);
     res.status(201).send({
