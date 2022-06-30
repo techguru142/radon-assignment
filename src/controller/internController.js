@@ -1,6 +1,7 @@
 const internModel = require("../Models/internModels");
 const collegeModel = require("../Models/collegeModels");
 const validator = require("validator");
+const { isValidObjectId } = require("mongoose");
 
 const createIntern = async function (req, res) {
   const isValid = function (value) {
@@ -20,12 +21,17 @@ const createIntern = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "Please provide intern details" });
     //extracting body keys
-    const { name, email, mobile, collegeName, isDeleted } = requestBody;
+    const { name, email, mobile, collegeId, isDeleted } = requestBody;
     //for valid name
     if (!isValid(name))
       return res
         .status(400)
         .send({ status: false, message: "Please provide valid name" });
+
+    if (typeof name!="string")
+      return res
+        .status(400)
+        .send({ status: false, message: "Please provide name in string" });
 
     if (validator.isAlpha(name) === false)
       return res.status(400).send({
@@ -50,17 +56,26 @@ const createIntern = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please provide valid mobile" });
-
-    if (validator.isNumeric(mobile) === false)
-      return res.status(400).send({
-        status: false,
-        message: `number should be valid mobile number`,
-      });
-
-    if (!isValid(collegeName))
+    if (typeof mobile ==="string")
       return res
         .status(400)
-        .send({ status: false, message: "Please provide valid collegeName." });
+        .send({ status: false, message: "Please provide mobile number in Number format" });
+
+    // if (validator.isNumeric(mobile) === false && mobile.length!=10)
+    if(/^[789][0-9]{9}$/.test(mobile)==false)
+      return res.status(400).send({
+        status: false,
+        message: `number should be valid mobile number & ${String(mobile).length} is not equal to 10`,
+      });
+
+    if (!isValid(collegeId))
+      return res
+        .status(400)
+        .send({ status: false, message: "Please provide valid collegeId." });
+    if (collegeId.length!=24)
+      return res
+        .status(400)
+        .send({ status: false, message: `Please provide 24 digit id.${collegeId.length} not allowed` });
     
     if (isDeleted == true)
       return res
@@ -88,17 +103,20 @@ const createIntern = async function (req, res) {
     //-------------------------VALIDATION ENDS-------------------------------//
 
     //checking college name by finding in college collection
-    let CollegeID = req.body.collegeId;
-    let collegeData = await collegeModel.findOne({ collegeId: CollegeID });
+    let collegeName = req.body.collegeName;
+    // console.log(collegeName)
+    let collegeData = await collegeModel.findOne({ name:collegeName });
+    
     if (!collegeData)
       return res.status(400).send({
         status: false,
-        message: `${CollegeID} is not a valid college name `,
+        message: `${collegeName} is not a valid college name `,
       });
 
     const validCollegeID = collegeData._id;
+    
     //collection all the data and storing it in a varibale
-    const internData = { name, email, mobile, collegeName };
+    const internData = { name, email, mobile, collegeId:validCollegeID };
     // console.log(internData)
     const createIntern = await internModel.create(internData);
     return res.status(201).send({
@@ -113,11 +131,12 @@ const createIntern = async function (req, res) {
 
 module.exports.createIntern = createIntern;
 
+
 const getCollegeDetails = async function (req, res) {
   try {
     let queryData = req.query;
     if (!queryData.name)
-      return res.status(400).send("Oops! key have empty space or invalid name");
+      return res.status(400).send({status:false,msg:"Oops! key have empty space or invalid name"});
 
     if (Object.keys(queryData).length == 0)
       return res

@@ -1,7 +1,7 @@
 // const mongoose = require("mongoose");
 const collegeModels = require("../Models/collegeModels");
 // const internModels = require("../models/internModels");
-const validator = require("validator");
+// const validator = require("validator");
 
 const createCollege = async function (req, res) {
   const isValid = function (value) {
@@ -32,27 +32,39 @@ const createCollege = async function (req, res) {
         message: "Please Provide College Name To Create College",
       });
 
-    if (validator.isAlpha(name) == false)
+    if (/^[a-zA-Z]+$/.test(name)==false)
       return res
         .status(400)
-        .send({ status: false, message: "name must be in aplhabets" });
+        .send({ status: false, message: "name can not be a number" });
 
     if (!isValid(logoLink))
       return res
         .status(400)
         .send({ status: false, message: "Please Provide Logo Link" });
 
-    if (!isValid(fullName))
+    if (/^[a-zA-Z ]+$/.test(fullName)==false)
+      return res
+        .status(400)
+        .send({ status: false, message: "Fullname can not be a number" });
+
+    if (!isValid(fullName) )
       return res.status(400).send({
         status: false,
         message: "Please Provide College Full Name To Create College",
       });
-    if (isDeleted == true)
+    if (isDeleted == true )
       return res
         .status(400)
         .send({
           status: false,
-          msg: "Intern Details has been already Deleted",
+          msg: "College Details has been already Deleted",
+        });
+    if (typeof isDeleted==="string")
+      return res
+        .status(400)
+        .send({
+          status: false,
+          msg: "isDeleted should be Boolean type",
         });
 
     //Unique items
@@ -62,7 +74,7 @@ const createCollege = async function (req, res) {
       return res.status(400).send({ message: `${name} is Already Exists` });
 //-----------------------------------VALIDATION ENDS----------------------------------------//
     
-    const collegeData = { name, fullName, logoLink };
+    const collegeData = { name, fullName, logoLink ,isDeleted};
 
     const collegeInfo = await collegeModels.create(collegeData);
     res.status(201).send({

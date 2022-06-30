@@ -9,7 +9,7 @@ let internSchema = new mongoose.Schema({
     required: "Please enter email",
   },
   mobile: {
-    type: String,
+    type: Number,
     required: "Please enter mobile number",
     unique: true,
   },
