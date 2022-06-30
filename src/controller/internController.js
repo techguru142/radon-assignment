@@ -116,26 +116,20 @@ module.exports.createIntern = createIntern;
 const getCollegeDetails = async function (req, res) {
   try {
     let queryData = req.query;
-    if (!queryData.name)
+    if (Object.keys(queryData).length == 0){
+      return res.status(400).send({ status: false, msg: "please enter data in query" });
+    };
+    if (!queryData.name){
       return res.status(400).send("Oops! key have empty space or invalid name");
-
-    if (Object.keys(queryData).length == 0)
-      return res
-        .status(400)
-        .send({ status: false, msg: "please enter data in query" });
-
-    let collegeData = await collegeModel
-      .findOne({ name: queryData.name })
-      .select({ name: 1, fullName: 1, logoLink: 1, isDeleted: 1, _id: 0 });
+    };
+    //************************DB CALL************************/
+   let collegeData = await collegeModel.findOne({ name: queryData.name }).select({ name: 1, fullName: 1, logoLink: 1, isDeleted: 1});
     if (!collegeData)
-      return res
-        .status(400)
-        .send({ status: false, msg: "Oops! data not found" });
-
-    let internData = await internModel
-      .find({ collegeName: queryData.name })
-      .populate("collegeId")
-      .select({ collegeId: 0 });
+      return res.status(404).send({ status: false, msg: "Oops! data not found" }); // if wrong entry 
+      let collegeId = collegeData._id.valueOf()
+    let internData = await internModel.find({ collegeId:collegeId}).populate("collegeId").select({ collegeId: 0 });
+      if(internData.length == 0){ return res.status(404).send({status:false, msg:"Sorry! no intern for this college"})}
+  //********************** Destructuring********************************/
     let data = {
       name: collegeData.name,
       fullName: collegeData.fullName,
@@ -143,9 +137,10 @@ const getCollegeDetails = async function (req, res) {
       isDeleted: collegeData.isDeleted,
       intern: internData,
     };
-    res.status(200).send({ data: data });
+     res.status(200).send({ data: data });
+   
   } catch (err) {
-    return res.status(500).send({ status: false, Error: err.message });
+    res.status(500).send({ status: false, Error: err.message });
   }
 };
 
