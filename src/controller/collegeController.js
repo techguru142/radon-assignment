@@ -42,7 +42,7 @@ const createCollege = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Please Provide Logo Link" });
 
-    if (/^[a-zA-Z ]+$/.test(fullName) == false)
+    if (/^[a-zA-Z, ]+$/.test(fullName) == false)
       return res
         .status(400)
         .send({ status: false, message: "Fullname can not be a number" });
