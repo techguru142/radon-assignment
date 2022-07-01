@@ -27,7 +27,7 @@ const createIntern = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Please provide name" });
 
-    if (/^[a-zA-Z]+$/.test(name) == false)
+    if (/^[a-zA-Z_ ]+$/.test(name) == false)
       return res.status(400).send({
         status: false,
         message: "Please provide only Alphabets in name",
@@ -50,16 +50,22 @@ const createIntern = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please provide mobile" });
-    if (typeof mobile === "string")
+    if (typeof mobile === "string") {
       return res
         .status(400)
-        .send({ status: false, message: "Please provide in number format" });
-
+        .send({ status: false, message: "Please mobile in Number type" });
+    }
     if (String(mobile).length !== 10)
       return res.status(400).send({
         status: false,
         message: `${String(mobile).length} digit is not a valid for Mobile`,
       });
+    if (!/^[789][0-9]{9}$/.test(mobile)) {
+      return res.status(400).send({
+        status: false,
+        msg: `${mobile} is not a valid mobile number(start with 7,8,9)`,
+      });
+    }
 
     if (!isValid(collegeName))
       return res
@@ -102,7 +108,7 @@ const createIntern = async function (req, res) {
 
     //collection all the data and storing it in a varibale
     const internData = {
-      isDeleted,
+      isDeleted: false,
       name,
       email,
       mobile,
