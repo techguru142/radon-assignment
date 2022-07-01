@@ -115,7 +115,7 @@ const createIntern = async function (req, res) {
       collegeId: validCollegeID,
     };
 
-    internModel.create(internData);
+    await internModel.create(internData);
     return res.status(201).send({
       status: true,
       message: `Intern created successfully`,
