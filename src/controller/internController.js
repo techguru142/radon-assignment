@@ -27,13 +27,14 @@ const createIntern = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Please provide name" });
 
-    if (/^[a-zA-Z_ ]+$/.test(name) == false)
+    if (/^[a-zA-Z_]+[\s][a-zA-Z]+$/.test(name) == false)
       return res.status(400).send({
         status: false,
         message: "Please provide only Alphabets in name",
       });
 
-    //for valid email
+    //-------------------------valid email & unique e-mail-----------------------------//
+
     if (!isValid(email))
       return res
         .status(400)
@@ -44,53 +45,50 @@ const createIntern = async function (req, res) {
         status: false,
         message: `Email should be a valid email address`,
       });
-
-    //for valid mobile
+    const isEmailAlreadyUsed = await internModel.findOne({ email });
+    if (isEmailAlreadyUsed)
+      return res.status(400).send({
+        status: false,
+        message: `${email} email is already registered`,
+      });
+    /*--------------------------------------------------------------------------------*/
+    //------------------------valid & unique mobile--------------------------------//
     if (!isValid(mobile))
       return res
         .status(400)
-        .send({ status: false, message: "Please provide mobile" });
-    if (typeof mobile === "string") {
-      return res
-        .status(400)
-        .send({ status: false, message: "Please mobile in Number type" });
-    }
-    if (String(mobile).length !== 10)
-      return res.status(400).send({
-        status: false,
-        message: `${String(mobile).length} digit is not a valid for Mobile`,
-      });
+        .send({ status: false, message: "Please provide mobile number" });
+
     if (!/^[789][0-9]{9}$/.test(mobile)) {
       return res.status(400).send({
         status: false,
-        msg: `${mobile} is not a valid mobile number(start with 7,8,9)`,
+        msg: `${mobile} is not a valid mobile number(start with 7,8,9) or ${
+          String(mobile).length
+        } is not allowed`,
       });
     }
 
-    if (!isValid(collegeName))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please provide valid collegeName." });
-
-    if (isDeleted == true)
-      return res.status(400).send({
-        status: false,
-        msg: "Intern Details has been already Deleted",
-      });
-
-    //for unique items;-
     const isNumberAlreadyUsed = await internModel.findOne({ mobile });
     if (isNumberAlreadyUsed)
       return res.status(400).send({
         status: false,
         message: `${mobile} number is already registered`,
       });
+    /*--------------------------------------------------------------------------------*/
 
-    const isEmailAlreadyUsed = await internModel.findOne({ email });
-    if (isEmailAlreadyUsed)
+    if (!isValid(collegeName))
+      return res
+        .status(400)
+        .send({ status: false, message: "Please provide valid collegeName." });
+
+    if (typeof isDeleted !== "boolean")
       return res.status(400).send({
         status: false,
-        message: `${email} email is already registered`,
+        msg: "isDeleted type must be Boolean",
+      });
+    if (isDeleted == true)
+      return res.status(400).send({
+        status: false,
+        msg: "You can't delete data before creation",
       });
 
     //-------------------------VALIDATION ENDS-------------------------------//
@@ -98,6 +96,7 @@ const createIntern = async function (req, res) {
     //checking college name by finding in college collection
     let CollegeID = req.body.collegeName;
     let collegeData = await collegeModel.findOne({ name: CollegeID });
+    console.log(collegeData);
     if (!collegeData)
       return res.status(400).send({
         status: false,
@@ -127,29 +126,42 @@ const createIntern = async function (req, res) {
 };
 
 module.exports.createIntern = createIntern;
+/*-------------------------------------------------GET API------------------------------------------------*/
 
 const getCollegeDetails = async function (req, res) {
   try {
     let queryData = req.query;
-
+    let name = queryData.collegeName;
+    if (Object.keys(queryData).length > 1) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "Only collegeName is acceptable" });
+    }
     if (Object.keys(queryData).length == 0) {
       return res
         .status(400)
-        .send({ status: false, msg: "please enter data in query" });
+        .send({ status: false, msg: "please enter valid data in query" });
     }
-    if (!queryData.name) {
-      return res.status(400).send("Oops! key have empty space or invalid name");
+    if (!queryData.collegeName) {
+      return res
+        .status(400)
+        .send({
+          status: false,
+          msg: "Oops! key have empty space or invalid name",
+        });
     }
-    //************************DB CALL************************/
+    //************************DB CALL************************//
     let collegeData = await collegeModel
-      .findOne({ name: queryData.name })
-      .select({ name: 1, fullName: 1, logoLink: 1, isDeleted: 1 });
+      .findOne({ name: name })
+      .select({ name: 1, fullName: 1, logoLink: 1});
     if (!collegeData)
       return res
         .status(404)
         .send({ status: false, msg: "Oops! data not found" }); // if wrong entry
     let collegeId = collegeData._id.valueOf();
-    let internData = await internModel.find({ collegeId: collegeId });
+    let internData = await internModel
+      .find({ collegeId: collegeId })
+      .select({ collegeId: 0, __v: 0, isDeleted: 0 });
     if (internData.length == 0) {
       return res
         .status(404)
