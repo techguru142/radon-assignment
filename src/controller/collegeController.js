@@ -1,7 +1,4 @@
-// const mongoose = require("mongoose");
 const collegeModels = require("../Models/collegeModels");
-// const internModels = require("../models/internModels");
-// const validator = require("validator");
 
 const createCollege = async function (req, res) {
   const isValid = function (value) {
@@ -42,6 +39,26 @@ const createCollege = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Please Provide Logo Link" });
 
+    if (
+      !/^(http(s)?:\/\/)?(www.)?([a-zA-Z0-9])+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,5}(:[0-9]{1,5})?(\/[^\s]*)?$/.test(
+        logoLink
+      )
+    )
+      return res
+        .status(400)
+        .send({ status: false, msg: "link is not a valid link" });
+
+      //check logoLink and collegeName is matching or not
+        let checkLogoLink=req.body.logoLink
+
+    let checkLogo = await collegeModels.findOne({ logoLink:checkLogoLink  });
+
+    if (checkLogo)
+     return res
+        .status(400)
+        .send({ status: false, msg: "This Link has already taken by other college" });
+
+
     if (/^[a-zA-Z, ]+$/.test(fullName) == false)
       return res
         .status(400)
@@ -52,23 +69,25 @@ const createCollege = async function (req, res) {
         status: false,
         message: "Please Provide College Full Name To Create College",
       });
-    if (isDeleted == true)
-      return res.status(400).send({
-        status: false,
-        msg: "College Details has been already Deleted",
-      });
-    if (typeof isDeleted === "string")
+
+    if (typeof isDeleted !== "boolean")
       return res.status(400).send({
         status: false,
         msg: "isDeleted should be Boolean type",
       });
 
-    //Unique items
-    const duplicatefullNames = await collegeModels.findOne({ name: name });
+    if (isDeleted == true)
+      return res.status(400).send({
+        status: false,
+        msg: "You can't Delete before creation",
+      });
 
+    //Unique items
+    const duplicatefullNames = await collegeModels.findOne({ name });
+    // console.log(duplicatefullNames)
     if (duplicatefullNames)
       return res.status(400).send({ message: `${name} is Already Exists` });
-    //-----------------------------------VALIDATION ENDS----------------------------------------//
+    //------------------------------VALIDATION ENDS----------------------------------//
 
     const collegeData = { name, fullName, logoLink, isDeleted };
 
